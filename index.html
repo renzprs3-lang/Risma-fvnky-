@@ -3,62 +3,85 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AZKA RMX DJ PRO</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#090916;color:white;font-family:Arial,sans-serif}
-header{text-align:center;padding:22px;background:#17172b;border-bottom:2px solid #00eaff}
-h1{color:#00eaff;margin:0;text-shadow:0 0 12px #00eaff}
-main{max-width:850px;margin:auto;padding:16px}
-.decks{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.deck{background:#19192e;border:1px solid #00d9ff;border-radius:14px;padding:15px;text-align:center}
-.disc{width:100px;height:100px;border:8px solid #444;border-radius:50%;margin:12px auto;background:radial-gradient(circle,#00eaff 0 8%,#111 10% 100%);box-shadow:0 0 18px #00d9ff}
-button{background:#00cfe8;color:#071018;border:0;border-radius:9px;padding:12px;margin:5px;font-weight:bold}
-input{max-width:100%}
-.panel{background:#19192e;padding:15px;border-radius:14px;margin-top:15px}
-.track{padding:12px;border-bottom:1px solid #444;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.track button{padding:9px}
+body{
+  margin:0;padding:16px;
+  font-family:Arial,sans-serif;
+  color:white;
+  background:linear-gradient(135deg,#090016,#16002d,#001b30);
+}
+header{text-align:center;padding:20px 0}
+h1{color:#00eaff;text-shadow:0 0 15px #00eaff}
+h2{color:#ff36d7}
+.deck{
+  background:#17132b;
+  border:1px solid #00eaff;
+  border-radius:15px;
+  padding:18px;
+  margin:15px 0;
+  box-shadow:0 0 12px #00eaff55;
+}
+button{
+  background:#00cce8;color:#001018;
+  border:0;border-radius:8px;
+  padding:11px 14px;margin:5px;
+  font-weight:bold;
+}
+button:active{background:#ff36d7}
+.song{
+  background:#29203e;padding:12px;
+  margin:9px 0;border-radius:9px;
+}
+.song button{float:right}
+audio{width:100%;margin:8px 0}
+input[type=range]{width:100%;accent-color:#00eaff}
 small{color:#aaa}
-@media(max-width:480px){.decks{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+
 <header>
-<h1>AZKA RMX DJ PRO</h1>
-<p>DJ Music Player</p>
+<h1>🎧 AZKA RMX DJ PRO</h1>
+<p>WELCOME TO MY DJ MUSIC PLAYER</p>
 </header>
-<main>
-<div class="decks">
-<section class="deck">
-<h2>DECK A</h2><div class="disc"></div>
-<audio id="audioA" controls style="width:100%"></audio>
-<button onclick="document.getElementById('audioA').play()">PLAY A</button>
-<button onclick="document.getElementById('audioA').pause()">PAUSE</button>
-</section>
-<section class="deck">
-<h2>DECK B</h2><div class="disc"></div>
-<audio id="audioB" controls style="width:100%"></audio>
-<button onclick="document.getElementById('audioB').play()">PLAY B</button>
-<button onclick="document.getElementById('audioB').pause()">PAUSE</button>
-</section>
+
+<div class="deck">
+<h2>🎵 DECK A</h2>
+<p id="titleA">Belum ada lagu</p>
+<audio id="audioA" controls></audio>
+<button onclick="playA()">PLAY A</button>
+<button onclick="pauseA()">PAUSE A</button>
 </div>
-<section class="panel">
-<h2>🎵 MUSIC LIBRARY</h2>
-<p><small>Pilih lagu untuk diputar di Deck A atau Deck B.</small></p>
-<div id="library">Belum ada daftar lagu.</div>
-</section>
-<section class="panel">
-<h2>🎚️ DJ MIXER</h2>
-<label>Crossfader</label>
-<input type="range" min="0" max="100" value="50" style="width:100%" oninput="mix(this.value)">
-</section>
-</main>
+
+<div class="deck">
+<h2>🎵 DECK B</h2>
+<p id="titleB">Belum ada lagu</p>
+<audio id="audioB" controls></audio>
+<button onclick="playB()">PLAY B</button>
+<button onclick="pauseB()">PAUSE B</button>
+</div>
+
+<div class="deck">
+<h2>🎚️ CROSSFADER</h2>
+<input type="range" min="0" max="100" value="50"
+oninput="mix(this.value)">
+<p><small>DECK A ← GESER → DECK B</small></p>
+</div>
+
+<div class="deck">
+<h2>🎼 MUSIC LIBRARY</h2>
+<div id="library"></div>
+</div>
+
+<footer style="text-align:center;padding:20px">
+<small>AZKA RMX DJ PRO © 2026</small>
+</footer>
+
 <script>
-const SUPABASE_URL="https://fvrslvvzfuygkswvzmou.supabase.co";
-const BUCKET="Azka music";
-const SONGS=[];
-const SONGS=[
+const SONGS = [
 {
 name:"Onty Azka Rmx nex",
 url:"https://fvrslvvzfuygkswvzmou.supabase.co/storage/v1/object/public/Azka%20music/Onty%20Azka%20Rmx%20nex%20.mp3"
@@ -80,34 +103,57 @@ name:"JANGAN SE TINGGAL KITA RISMA",
 url:"https://fvrslvvzfuygkswvzmou.supabase.co/storage/v1/object/public/Azka%20music/JANGAN%20SE%20TINGGAL%20KITA%20RISMA%20-%20AZKA%20RMX%20FT.%20RISMA%20RMX%20(1).mp3"
 }
 ];
- 
+
+const audioA=document.getElementById("audioA");
+const audioB=document.getElementById("audioB");
+const titleA=document.getElementById("titleA");
+const titleB=document.getElementById("titleB");
 const library=document.getElementById("library");
-function addSong(name,url){
- const item=document.createElement("div");
- item.className="track";
- const title=document.createElement("span");
- title.textContent=name;
- const controls=document.createElement("span");
- ["A","B"].forEach(deck=>{
-  const btn=document.createElement("button");
-  btn.textContent="▶ "+deck;
-  btn.onclick=()=>{
-   const audio=document.getElementById("audio"+deck);
-   audio.src=url;
-   audio.play();
-  };
-  controls.appendChild(btn);
- });
- item.append(title,controls);
- library.appendChild(item);
+
+function loadA(song){
+  audioA.src=song.url;
+  titleA.textContent=song.name;
+  audioA.load();
 }
-SONGS.forEach(song=>addSong(song.name,song.url));
+function loadB(song){
+  audioB.src=song.url;
+  titleB.textContent=song.name;
+  audioB.load();
+}
+function playA(){audioA.play()}
+function pauseA(){audioA.pause()}
+function playB(){audioB.play()}
+function pauseB(){audioB.pause()}
+
 function mix(value){
- const a=document.getElementById("audioA");
- const b=document.getElementById("audioB");
- a.volume=1-value/100;
- b.volume=value/100;
+  const x=Number(value)/100;
+  audioA.volume=1-x;
+  audioB.volume=x;
 }
+
+SONGS.forEach((song,index)=>{
+  const item=document.createElement("div");
+  item.className="song";
+
+  const name=document.createElement("strong");
+  name.textContent=(index+1)+". "+song.name;
+
+  const buttons=document.createElement("div");
+
+  const buttonA=document.createElement("button");
+  buttonA.textContent="DECK A";
+  buttonA.onclick=()=>loadA(song);
+
+  const buttonB=document.createElement("button");
+  buttonB.textContent="DECK B";
+  buttonB.onclick=()=>loadB(song);
+
+  buttons.appendChild(buttonA);
+  buttons.appendChild(buttonB);
+  item.appendChild(name);
+  item.appendChild(buttons);
+  library.appendChild(item);
+});
 </script>
 </body>
 </html>
